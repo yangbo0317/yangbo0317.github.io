@@ -5,18 +5,18 @@
   
   <title>zooKeeper | 杨波的博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="Paxos理论两阶段提交三阶段提交ZAB算法">
+  <meta name="description" content="Paxos理论 ​    Paxos 算法解决的问题是一个分布式系统如何就某个值（决议）达成一致。一个典型的场景是，在一个分布式数据库系统中，如果各节点的初始状态一致，每个节点执行相同的操作序列，那么他们最后能得到一个一致的状态。为保证每个节点执行相同的命令序列，需要在每一条指令上执行一个“一致性算法”以保证每个节点看到的指令一致。一个通用的一致性算法可以应用在许多场景中，是分布式计算中的重要问题">
 <meta name="keywords" content="技术">
 <meta property="og:type" content="article">
 <meta property="og:title" content="zooKeeper">
 <meta property="og:url" content="https://yangbo0317.github.io/2017/11/10/zooKeeper/index.html">
 <meta property="og:site_name" content="杨波的博客">
-<meta property="og:description" content="Paxos理论两阶段提交三阶段提交ZAB算法">
+<meta property="og:description" content="Paxos理论 ​    Paxos 算法解决的问题是一个分布式系统如何就某个值（决议）达成一致。一个典型的场景是，在一个分布式数据库系统中，如果各节点的初始状态一致，每个节点执行相同的操作序列，那么他们最后能得到一个一致的状态。为保证每个节点执行相同的命令序列，需要在每一条指令上执行一个“一致性算法”以保证每个节点看到的指令一致。一个通用的一致性算法可以应用在许多场景中，是分布式计算中的重要问题">
 <meta property="og:locale" content="zh">
-<meta property="og:updated_time" content="2017-11-10T05:30:22.000Z">
+<meta property="og:updated_time" content="2017-11-10T06:05:17.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="zooKeeper">
-<meta name="twitter:description" content="Paxos理论两阶段提交三阶段提交ZAB算法">
+<meta name="twitter:description" content="Paxos理论 ​    Paxos 算法解决的问题是一个分布式系统如何就某个值（决议）达成一致。一个典型的场景是，在一个分布式数据库系统中，如果各节点的初始状态一致，每个节点执行相同的操作序列，那么他们最后能得到一个一致的状态。为保证每个节点执行相同的命令序列，需要在每一条指令上执行一个“一致性算法”以保证每个节点看到的指令一致。一个通用的一致性算法可以应用在许多场景中，是分布式计算中的重要问题">
   
     <link rel="alternate" href="/atom.xml" title="杨波的博客" type="application/atom+xml">
   
@@ -91,7 +91,51 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h1 id="Paxos理论"><a href="#Paxos理论" class="headerlink" title="Paxos理论"></a>Paxos理论</h1><h2 id="两阶段提交"><a href="#两阶段提交" class="headerlink" title="两阶段提交"></a>两阶段提交</h2><h2 id="三阶段提交"><a href="#三阶段提交" class="headerlink" title="三阶段提交"></a>三阶段提交</h2><h1 id="ZAB算法"><a href="#ZAB算法" class="headerlink" title="ZAB算法"></a>ZAB算法</h1>
+        <h1 id="Paxos理论"><a href="#Paxos理论" class="headerlink" title="Paxos理论"></a>Paxos理论</h1><blockquote>
+<p>​    Paxos 算法解决的问题是一个<a href="https://baike.baidu.com/item/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F" target="_blank" rel="external">分布式系统</a>如何就某个值（决议）达成一致。一个典型的场景是，在一个<a href="https://baike.baidu.com/item/%E5%88%86%E5%B8%83%E5%BC%8F%E6%95%B0%E6%8D%AE%E5%BA%93%E7%B3%BB%E7%BB%9F" target="_blank" rel="external">分布式数据库系统</a>中，如果各节点的初始状态一致，每个节点执行相同的<a href="https://baike.baidu.com/item/%E6%93%8D%E4%BD%9C/20627491" target="_blank" rel="external">操作</a>序列，那么他们最后能得到一个一致的状态。为保证每个节点执行相同的命令序列，需要在每一条指令上执行一个“一致性算法”以保证每个节点看到的指令一致。一个通用的一致性算法可以应用在许多场景中，是分布式计算中的重要问题。因此从20世纪80年代起对于一致性算法的研究就没有停止过。节点通信存在两种模型：<a href="https://baike.baidu.com/item/%E5%85%B1%E4%BA%AB%E5%86%85%E5%AD%98" target="_blank" rel="external">共享内存</a>（Shared memory）和消息传递（Messages passing）。Paxos 算法就是一种基于消息传递模型的一致性算法。</p>
+</blockquote>
+<h2 id="两阶段提交"><a href="#两阶段提交" class="headerlink" title="两阶段提交"></a>两阶段提交</h2><blockquote>
+<p>二阶段提交(Two-phaseCommit)是指，在计算机网络以及数据库领域内，为了使基于分布式系统架构下的所有节点在进行事务提交时保持一致性而设计的一种算法(Algorithm)。通常，二阶段提交也被称为是一种协议(Protocol))。在分布式系统中，每个节点虽然可以知晓自己的操作时成功或者失败，却无法知道其他节点的操作的成功或失败。当一个事务跨越多个节点时，为了保持事务的ACID特性，需要引入一个作为协调者的组件来统一掌控所有节点(称作参与者)的操作结果并最终指示这些节点是否要把操作结果进行真正的提交(比如将更新后的数据写入磁盘等等)。因此，<strong>二阶段提交的算法思路可以概括为：参与者将操作成败通知协调者，再由协调者根据所有参与者的反馈情报决定各参与者是否要提交操作还是中止操作。</strong></p>
+</blockquote>
+<h2 id="三阶段提交"><a href="#三阶段提交" class="headerlink" title="三阶段提交"></a>三阶段提交</h2><p>与两阶段提交不同的是，三阶段提交有两个改动点。</p>
+<p>1、引入超时机制。同时在协调者和参与者中都引入超时机制。<br>2、在第一阶段和第二阶段中插入一个准备阶段。保证了在最后提交阶段之前各参与节点的状态是一致的。</p>
+<p>也就是说，除了引入超时机制之外，3PC把2PC的准备阶段再次一分为二，这样三阶段提交就有<code>CanCommit</code>、<code>PreCommit</code>、<code>DoCommit</code>三个阶段。</p>
+<h3 id="CanCommit阶段"><a href="#CanCommit阶段" class="headerlink" title="CanCommit阶段"></a>CanCommit阶段</h3><p>3PC的CanCommit阶段其实和2PC的准备阶段很像。协调者向参与者发送commit请求，参与者如果可以提交就返回Yes响应，否则返回No响应。</p>
+<blockquote>
+<p><strong>1.事务询问</strong> 协调者向参与者发送CanCommit请求。询问是否可以执行事务提交操作。然后开始等待参与者的响应。</p>
+<p><strong>2.响应反馈</strong> 参与者接到CanCommit请求之后，正常情况下，如果其自身认为可以顺利执行事务，则返回Yes响应，并进入预备状态。否则反馈No</p>
+</blockquote>
+<h3 id="PreCommit阶段"><a href="#PreCommit阶段" class="headerlink" title="PreCommit阶段"></a>PreCommit阶段</h3><p>协调者根据参与者的反应情况来决定是否可以记性事务的PreCommit操作。根据响应情况，有以下两种可能。</p>
+<p><strong>假如协调者从所有的参与者获得的反馈都是Yes响应，那么就会执行事务的预执行。</strong></p>
+<blockquote>
+<p><strong>1.发送预提交请求</strong> 协调者向参与者发送PreCommit请求，并进入Prepared阶段。</p>
+<p><strong>2.事务预提交</strong> 参与者接收到PreCommit请求后，会执行事务操作，并将undo和redo信息记录到事务日志中。</p>
+<p><strong>3.响应反馈</strong> 如果参与者成功的执行了事务操作，则返回ACK响应，同时开始等待最终指令。</p>
+</blockquote>
+<p><strong>假如有任何一个参与者向协调者发送了No响应，或者等待超时之后，协调者都没有接到参与者的响应，那么就执行事务的中断。</strong></p>
+<blockquote>
+<p><strong>1.发送中断请求</strong> 协调者向所有参与者发送abort请求。</p>
+<p><strong>2.中断事务</strong> 参与者收到来自协调者的abort请求之后（或超时之后，仍未收到协调者的请求），执行事务的中断。</p>
+</blockquote>
+<h3 id="doCommit阶段"><a href="#doCommit阶段" class="headerlink" title="doCommit阶段"></a>doCommit阶段</h3><p>该阶段进行真正的事务提交，也可以分为以下两种情况。</p>
+<p><strong>执行提交</strong></p>
+<blockquote>
+<p><strong>1.发送提交请求</strong> 协调接收到参与者发送的ACK响应，那么他将从预提交状态进入到提交状态。并向所有参与者发送doCommit请求。</p>
+<p><strong>2.事务提交</strong> 参与者接收到doCommit请求之后，执行正式的事务提交。并在完成事务提交之后释放所有事务资源。</p>
+<p><strong>3.响应反馈</strong> 事务提交完之后，向协调者发送Ack响应。</p>
+<p><strong>4.完成事务</strong> 协调者接收到所有参与者的ack响应之后，完成事务。</p>
+</blockquote>
+<p><strong>中断事务</strong> 协调者没有接收到参与者发送的ACK响应（可能是接受者发送的不是ACK响应，也可能响应超时），那么就会执行中断事务。</p>
+<blockquote>
+<p><strong>1.发送中断请求</strong> 协调者向所有参与者发送abort请求</p>
+<p><strong>2.事务回滚</strong> 参与者接收到abort请求之后，利用其在阶段二记录的undo信息来执行事务的回滚操作，并在完成回滚之后释放所有的事务资源。</p>
+<p><strong>3.反馈结果</strong> 参与者完成事务回滚之后，向协调者发送ACK消息</p>
+<p><strong>4.中断事务</strong> 协调者接收到参与者反馈的ACK消息之后，执行事务的中断。</p>
+</blockquote>
+<p>在doCommit阶段，如果参与者无法及时接收到来自协调者的doCommit或者rebort请求时，会在等待超时之后，会继续进行事务的提交。（其实这个应该是基于概率来决定的，当进入第三阶段时，说明参与者在第二阶段已经收到了PreCommit请求，那么协调者产生PreCommit请求的前提条件是他在第二阶段开始之前，收到所有参与者的CanCommit响应都是Yes。（一旦参与者收到了PreCommit，意味他知道大家其实都同意修改了）所以，一句话概括就是，当进入第三阶段时，由于网络超时等原因，虽然参与者没有收到commit或者abort响应，但是他有理由相信：成功提交的几率很大。 ）</p>
+<h2 id="2PC与3PC的区别"><a href="#2PC与3PC的区别" class="headerlink" title="2PC与3PC的区别"></a>2PC与3PC的区别</h2><p>相对于2PC，3PC主要解决的单点故障问题，并减少阻塞，因为一旦参与者无法及时收到来自协调者的信息之后，他会默认执行commit。而不会一直持有事务资源并处于阻塞状态。但是这种机制也会导致数据一致性问题，因为，由于网络原因，协调者发送的abort响应没有及时被参与者接收到，那么参与者在等待超时之后执行了commit操作。这样就和其他接到abort命令并执行回滚的参与者之间存在数据不一致的情况。</p>
+<hr>
+<h1 id="ZAB算法"><a href="#ZAB算法" class="headerlink" title="ZAB算法"></a>ZAB算法</h1>
       
     </div>
     <footer class="article-footer">
